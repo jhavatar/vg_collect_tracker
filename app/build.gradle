@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-//apply plugin: 'io.fabric'
+apply plugin: 'io.fabric'
 
 Properties projProps = new Properties()
 projProps.load(project.rootProject.file('project.properties').newDataInputStream())
@@ -11,7 +11,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
-        applicationId "io.jhavatar.template.kotlin"
+        applicationId "io.chthonic.vg_track"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode = projProps.getProperty("versionCode")
@@ -72,6 +72,13 @@ dependencies {
     implementation "com.android.support:percent:${rootProject.ext.supportLibVersion}"
     betaApi "com.android.support:multidex:1.0.2"
     prodApi "com.android.support:multidex:1.0.2"
+
+    // firebase
+    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+        transitive = true
+    }
+    compile "com.google.firebase:firebase-core:${rootProject.ext.firebaseVersion}"
+
 
     // kotlin
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
@@ -136,6 +143,5 @@ dependencies {
     })
 }
 
-
-// ADD THIS AT THE BOTTOM
-//apply plugin: 'com.google.gms.google-services'
+// Add to the bottom of the file
+apply plugin: 'com.google.gms.google-services'
