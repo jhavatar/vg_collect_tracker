@@ -1,5 +1,6 @@
 package io.chthonic.vg_track.business.service
 
+import io.chthonic.vg_track.business.reducer.AuthReducer
 import io.chthonic.vg_track.business.reducer.TodoListReducer
 import io.chthonic.vg_track.data.client.StateClient
 import io.chthonic.vg_track.data.model.AppState
@@ -15,6 +16,7 @@ class StateService {
     private val stateClient: StateClient<AppState> by lazy {
         val appStateReducer: AppStateReducer = AppStateReducer.builder()
                 .getTodoListReducer(TodoListReducer.create())
+                .getAuthReducer(AuthReducer.create())
                 .build()
         StateClient<AppState>(appStateReducer)
     }

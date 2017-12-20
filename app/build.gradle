@@ -78,7 +78,7 @@ dependencies {
         transitive = true
     }
     compile "com.google.firebase:firebase-core:${rootProject.ext.firebaseVersion}"
-
+    compile 'com.firebaseui:firebase-ui-auth:3.1.0'
 
     // kotlin
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")

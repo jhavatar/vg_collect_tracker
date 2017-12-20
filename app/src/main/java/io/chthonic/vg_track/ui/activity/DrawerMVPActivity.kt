@@ -1,5 +1,6 @@
 package io.chthonic.vg_track.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.LoaderManager
@@ -8,9 +9,15 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.Menu
 import android.view.MenuItem
+import com.firebase.ui.auth.AuthUI
+import com.github.salomonbrys.kodein.instance
+import com.github.salomonbrys.kodein.lazy
+import com.google.firebase.auth.FirebaseAuth
 import io.chthonic.mythos.mvp.MVPDispatcher
 import io.chthonic.mythos.mvp.Presenter
+import io.chthonic.vg_track.App
 import io.chthonic.vg_track.R
+import io.chthonic.vg_track.business.service.FirebaseAuthService
 import io.chthonic.vg_track.data.model.AppState
 import io.chthonic.vg_track.ui.vu.DrawerVu
 import kotlinx.android.synthetic.main.activity_drawer.*
@@ -21,9 +28,17 @@ import timber.log.Timber
  */
 abstract class DrawerMVPActivity<P, V>: BaseActivity(), NavigationView.OnNavigationItemSelectedListener where P : Presenter<V>, V : DrawerVu {
 
+    companion object {
+
+        @JvmStatic
+        protected val LOGIN_REQUEST = 123
+    }
+
     val mvpDispatcher: MVPDispatcher<P, V> by lazy {
         createMVPDispatcher()
     }
+
+    val authService: FirebaseAuthService by App.kodein.lazy.instance<FirebaseAuthService>()
 
     var toggle: ActionBarDrawerToggle? = null
 
@@ -53,19 +68,49 @@ abstract class DrawerMVPActivity<P, V>: BaseActivity(), NavigationView.OnNavigat
         initNavMenu()
         this.nav_view.setNavigationItemSelectedListener(this)
 
-        supportLoaderManager.initLoader(mvpDispatcher.uid,
-                null,
-                mvpDispatcher.presenterCache as LoaderManager.LoaderCallbacks<P>)
+        if (mvpDispatcher.presenterCache is LoaderManager.LoaderCallbacks<*>) {
+            supportLoaderManager.initLoader(mvpDispatcher.uid,
+                    null,
+                    mvpDispatcher.presenterCache as LoaderManager.LoaderCallbacks<P>)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         mvpDispatcher.linkPresenter(this.intent.extras)
+        authService.startSync()
+//        FirebaseAuth.getInstance().addAuthStateListener(object:FirebaseAuth.AuthStateListener() {
+//            override fun onAuthStateChanged(firebaseAuth: FirebaseAuth) {
+//                if (firebaseAuth.)
+//            }
+//
+//        })
     }
 
     override fun onPause() {
         mvpDispatcher.unlinkPresenter()
+        authService.stopSync()
         super.onPause()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == LOGIN_REQUEST) {
+//            if (resultCode == Activity.RESULT_OK) {
+//                signIn()
+//            }
+//        }
+
+//        Timber.d("onActivityResult: requestCode = $requestCode, resultCode = $resultCode, data = ${data?.extras}")
+//        data?.extras?.keySet()?.forEach {
+//            val value = data.extras.get(it)
+//            Timber.d("Extra $it = $value")
+//
+//            if (value is IdpResponse) {
+//                Timber.d("Extra errorCode = ${value.errorCode}")
+//                com.firebase.ui.auth.ErrorCodes.NO_NETWORK
+//            }
+//        }
     }
 
     override fun onDestroy() {
@@ -82,10 +127,36 @@ abstract class DrawerMVPActivity<P, V>: BaseActivity(), NavigationView.OnNavigat
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         closeDrawer(GravityCompat.START)
-        when (item.itemId) {
+        return when (item.itemId) {
+            R.id.nav_logout -> {
+                signOut()
+                true
+            }
+            else -> false
         }
 
         return false
+    }
+
+    protected fun signIn() {
+        if (!authService.isSignedIn()) {
+            Timber.d("currentUser = ${FirebaseAuth.getInstance().currentUser}")
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setAvailableProviders(listOf(AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build()))
+                            .build(),
+                    LOGIN_REQUEST);
+        }
+    }
+
+    protected fun signOut() {
+        AuthUI.getInstance().signOut(this)
+//                .addOnCompleteListener({
+//            Timber.d("logged out")
+//            firebaseAuthService.signOut()
+//        })
+
     }
 
 

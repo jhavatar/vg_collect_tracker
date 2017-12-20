@@ -10,10 +10,12 @@ import com.github.salomonbrys.kodein.singleton
 import io.chthonic.stash.Stash
 import io.chthonic.stash.cache.LruStorageCache
 import io.chthonic.stash.storage.SharedPrefsStorage
+import io.chthonic.vg_track.business.service.FirebaseAuthService
 import io.chthonic.vg_track.business.service.DroidPermissionsService
 import io.chthonic.vg_track.business.service.StateService
 import io.chthonic.vg_track.business.service.TodoListService
 import io.chthonic.vg_track.utils.DebugUtils
+import timber.log.Timber
 
 /**
  * Created by jhavatar on 3/2/17.
@@ -34,7 +36,8 @@ class App : BaseApp() {
             bind<Resources>() with instance(applicationContext.resources)
             bind<StateService>() with singleton{StateService()}
             bind<DroidPermissionsService>() with singleton{DroidPermissionsService(instance())}
-            bind<TodoListService>() with singleton{TodoListService(instance(), instance())}
+            bind<FirebaseAuthService>() with singleton{ FirebaseAuthService(instance()) }
+            bind<TodoListService>() with singleton{ TodoListService(instance(), instance()) }
             bind<Stash>() with singleton {
                 Stash.Builder(SharedPrefsStorage.Builder().name("stash").build(instance()))
                         .cache(LruStorageCache(100))
@@ -46,5 +49,8 @@ class App : BaseApp() {
             return
         }
         DebugUtils.install(this)
+
+//        Timber.plant(if (AnalyticsService.analyticsBuild) AnalyticsLog(BuildConfig.DEBUG, kodein.instance()) else Timber.DebugTree())
+        Timber.plant(Timber.DebugTree())
     }
 }
