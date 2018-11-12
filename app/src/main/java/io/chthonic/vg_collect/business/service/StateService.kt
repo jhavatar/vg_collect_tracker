@@ -2,6 +2,7 @@ package io.chthonic.vg_collect.business.service
 
 import io.chthonic.vg_collect.business.observer.AppStateChangePublisher
 import io.chthonic.vg_collect.business.observer.AppStateChangeSubject
+import io.chthonic.vg_collect.business.reducer.AuthReducer
 import io.chthonic.vg_collect.business.reducer.FooReducer
 import io.chthonic.vg_collect.data.client.StateClient
 import io.chthonic.vg_collect.data.model.AppState
@@ -15,8 +16,8 @@ class StateService: AppStateChangeSubject {
     private val stateClient: StateClient<AppState> by lazy {
         val appStateReducer: AppStateReducer = AppStateReducer.builder()
             .getFooStateReducer(FooReducer.create())
-//                .getCalculatorStateReducer(CalculatorReducer.create())
-                .build()
+            .getAuthReducer(AuthReducer.create())
+            .build()
         StateClient<AppState>(appStateReducer)
     }
 

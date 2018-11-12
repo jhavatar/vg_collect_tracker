@@ -8,4 +8,5 @@ import com.yheriatovych.reductor.annotations.CombinedState
 @CombinedState
 interface AppState {
     val fooState: FooState
+    val auth: Auth
 }

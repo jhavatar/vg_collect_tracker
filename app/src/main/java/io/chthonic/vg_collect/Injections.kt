@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.chthonic.vg_collect.business.service.FirebaseAuthService
 import io.chthonic.vg_collect.business.service.StateService
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
@@ -24,6 +25,7 @@ fun depInject(app: Application): Kodein {
             app.applicationContext.getSharedPreferences("prefs", Context.MODE_PRIVATE)
         }
         bind<StateService>() with singleton{ StateService() }
+        bind<FirebaseAuthService>() with singleton{ FirebaseAuthService(instance()) }
         bind<Moshi>() with singleton {
             Moshi.Builder()
                     .add(KotlinJsonAdapterFactory())
